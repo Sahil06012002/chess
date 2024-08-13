@@ -1,14 +1,14 @@
 import { BrowserRouter, Route , Routes } from 'react-router-dom'
 import './App.css'
-import ChessBoard from './components/ChessBoard'
-import Home from './components/Home'
+import LandingPage from './screens/LandingPage'
+import Game from './screens/Game'
 function App() {
     return (
         <BrowserRouter>
       <Routes>
-      <Route path="/" element={<Home />}> 
+      <Route path="/" element={<LandingPage />}> 
         </Route> 
-        <Route path="/game" element = {<ChessBoard/>}> 
+        <Route path="/game" element = {<Game/>}> 
         </Route>
       </Routes>
     </BrowserRouter>

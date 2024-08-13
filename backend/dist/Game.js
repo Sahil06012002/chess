@@ -70,18 +70,21 @@ class Game {
         }
         else {
             console.log("piece moved");
-            if (this.board.turn() === 'b') {
-                (_a = this.player2) === null || _a === void 0 ? void 0 : _a.send(JSON.stringify({
-                    type: Message_1.MOVE,
-                    payload: move
-                }));
-            }
-            else {
-                (_b = this.player1) === null || _b === void 0 ? void 0 : _b.send(JSON.stringify({
-                    type: Message_1.MOVE,
-                    payload: move
-                }));
-            }
+            //sned new board to both the players
+            (_a = this.player1) === null || _a === void 0 ? void 0 : _a.send(JSON.stringify({
+                type: Message_1.MOVE,
+                payload: {
+                    move: move,
+                    currentBoard: this.board.board()
+                }
+            }));
+            (_b = this.player2) === null || _b === void 0 ? void 0 : _b.send(JSON.stringify({
+                type: Message_1.MOVE,
+                payload: {
+                    move: move,
+                    currentBoard: this.board.board()
+                }
+            }));
         }
     }
 }

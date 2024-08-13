@@ -10,9 +10,12 @@ const app = (0, express_1.default)();
 const server = app.listen(8080, () => {
     console.log("server is listning");
 });
+let count = 0;
 const wss = new ws_1.WebSocketServer({ server });
 wss.on('connection', (ws) => {
+    count++;
+    let socketIdentifier = { id: count, socket: ws };
     const instance = GameManager_1.default.getInstance();
-    instance.addUser(ws);
+    instance.addUser(socketIdentifier);
     ws.send('Welcome to the WebSocket server');
 });

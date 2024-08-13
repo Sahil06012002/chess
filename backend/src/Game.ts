@@ -83,19 +83,23 @@ export default class Game{
         }
         else{
             console.log("piece moved");
-            if(this.board.turn() === 'b')
-                {
-                    this.player2?.send(JSON.stringify({
-                    type: MOVE,
-                    payload: move
-                   }));
+            //sned new board to both the players
+
+            this.player1?.send(JSON.stringify({
+                type: MOVE,
+                payload: {
+                    move : move,
+                    currentBoard : this.board.board()
                 }
-            else {
-                this.player1?.send(JSON.stringify({
-                    type: MOVE,
-                    payload: move
-                   }));
+               }));
+        
+            this.player2?.send(JSON.stringify({
+            type: MOVE,
+            payload: {
+                move : move,
+                currentBoard : this.board.board()
             }
+            }));
 
         }
 

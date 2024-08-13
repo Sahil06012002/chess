@@ -1,64 +1,78 @@
-import {  useEffect, useState } from "react";
-import Square from "./Squarre";
+import { useEffect, useState } from "react";
+import { Chess, Color, PieceSymbol, Square } from "chess.js";
 
-export default function ChessBoard()
-{
+export const GAME_INIT = "game_init";
+export const MOVE = "move";
+export const GAME_OVER = "game_over";
 
-    const arr: string[] = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
-    const nums : number[] = [8,7,6,5,4,3,2,1];
+export default function ChessBoard({ socket }: { socket: WebSocket | null }) {
+  const [chess, setChess] = useState(new Chess());
+  const [board, setBoard] = useState<
+    ({
+      square: Square;
+      type: PieceSymbol;
+      color: Color;
+    } | null)[][]
+  >(chess.board());
+  const [from, setFrom] = useState<Square | null>(null);
+  const [to, setTo] = useState<Square | null>(null);
 
-    //----------------------------------------------
-    const [moves,setMoves]  = useState<string[]>([]);
-    const connectionString = localStorage.getItem("socket");
-    let message = null;
-    if(connectionString)
-    {
-      message =  JSON.parse(connectionString);
+  useEffect(() => {
+    if (socket) {
+      socket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        console.log(data.payload.currentBoard);
+        setBoard(data.payload.currentBoard);
+      };
     }
-    useEffect(()=>{
-        if(message)
-        {
-          console.log(message);
-          console.log("got the conncetion");
-            if(moves.length === 2)
-            {
-              message.onopen = () =>{
-                    console.log("connected");
-                    message.send(JSON.stringify({
-                        type: 'move',
-                        move : {
-                            from : moves[0],
-                            to : moves[1]
-                        }
-                        }));        
+  }, [socket]);
+
+  return (
+    <div className="flex flex-col bg-green-600">
+      {board?.map((row, rowIndex) => (
+        <div key={rowIndex} className="flex">
+          {row.map((piece, colIndex) => (
+            <div
+              onClick={() => {
+                const position = (String.fromCharCode(97 + colIndex) +
+                  (8 - rowIndex)) as Square;
+                if (!from) {
+                  setFrom(position);
+                } else {
+                  console.log("cordinates of to  : " + position);
+                  socket?.send(
+                    JSON.stringify({
+                      type: "move",
+                      move: {
+                        from: from,
+                        to: position,
+                      },
+                    })
+                  );
+                  setFrom(null);
                 }
-              setMoves([]);
-            }
-        }
-    },[moves]);
-    //----------------------------------------
-
-
-
-    function getSquareId(id : string)
-    {
-      setMoves([...moves,id]);
-      console.log(id);
-    }
-    return <div className="bg-neutral-700 h-screen flex justify-center items-center">
-      <div className="border-0 rounded-xl grid grid-cols-8">
-        {
-          nums.map((num) => 
-          {
-            return arr.map((alphabet) =>
-              {
-                const str  = alphabet+num;
-                return <Square key={str} coordinate={str} id={str} fun = {getSquareId} />
-              }
-            )
-          }
-          )
-        }
+              }}
+              key={colIndex}
+              className={`p-4 w-16 h-16 flex justify-center items-center ${
+                (rowIndex + colIndex) % 2 === 0
+                  ? "bg-green-600"
+                  : "bg-slate-900"
+              }`}
+            >
+              <div>
+                <img
+                  src={`${
+                    piece?.color !== "b"
+                      ? `${piece?.type}.png`
+                      : `${piece?.type}B.png`
+                  }`}
+                  alt=""
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      ))}
     </div>
-    </div>
+  );
 }
